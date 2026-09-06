@@ -20,7 +20,7 @@ python -m venv .venv
 
 ## 使用修改后的 Qt / PySide
 
-1. 从 [同一 Release](https://github.com/Freeze7y/gpu-selector/releases/tag/v2.1.0)
+1. 从 [同一 Release](https://github.com/Freeze7y/gpu-selector/releases/tag/v2.1.1)
    取得 `qtbase-everywhere-src-6.11.2.tar.xz` 与
    `pyside-setup-everywhere-src-6.11.2.tar.xz`，按
    [第三方声明](THIRD_PARTY_NOTICES.md) 中 SHA-256 校验。两包包含其构建脚本。

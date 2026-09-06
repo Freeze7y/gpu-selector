@@ -3,7 +3,7 @@ import datetime
 import json
 from pathlib import Path
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QItemSelectionModel, Qt
 from PySide6.QtWidgets import (QAbstractItemView, QFileDialog, QMessageBox,
     QHBoxLayout, QHeaderView, QLabel, QPushButton, QTabWidget, QTableWidget,
     QTableWidgetItem, QTextEdit, QVBoxLayout, QWidget)
@@ -92,10 +92,11 @@ class ManagementPage(QWidget):
         layout.addWidget(self.tabs)
         page = QWidget()
         content = QVBoxLayout(page)
-        hint = QLabel('选中备份查看恢复资格，或将不再需要的备份移到回收站。暂时不可恢复不代表没有用；恢复前会重新检查用户、电脑、驱动和设置。')
+        hint = QLabel('选中一份备份查看恢复资格；可用 Ctrl / Shift 多选或 Ctrl+A 全选后清除。暂时不可恢复不代表没有用；恢复前会重新检查用户、电脑、驱动和设置。')
         hint.setWordWrap(True)
         content.addWidget(hint)
         self.backup_table = table(['备份时间', '操作', '操作目标', '恢复资格'])
+        self.backup_table.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.backup_table.setColumnWidth(0, 155)
         self.backup_table.setColumnWidth(1, 110)
         self.backup_table.setColumnWidth(2, 220)
@@ -154,17 +155,13 @@ class ManagementPage(QWidget):
         self.refresh_health()
 
     def refresh_backups(self):
-        selected = self.selected_backup()
-        selected_path = selected['path'] if selected else None
+        selected_paths = {b['path'] for b in self.selected_backups()}
         try:
             self.backups = backup_rows(self.owner.db, self.owner.backup_dir, self.owner.gpus)
             self.backup_table.blockSignals(True)
             fill(self.backup_table, [[b['time'], b['label'], b['target'],
                  '可恢复' if b['eligible'] else '不可恢复：' + b['error']] for b in self.backups])
-            self.backup_table.clearSelection()
-            index = next((i for i, b in enumerate(self.backups) if b['path'] == selected_path), None)
-            if index is not None:
-                self.backup_table.selectRow(index)
+            self.select_backup_paths(selected_paths)
             self.backup_table.blockSignals(False)
             self.selection_changed()
         except Exception as exc:
@@ -175,16 +172,33 @@ class ManagementPage(QWidget):
             self.clear_button.setEnabled(False)
             self.backup_detail.setPlainText('备份列表读取失败：' + str(exc))
 
+    def selected_backups(self):
+        rows = sorted(index.row() for index in self.backup_table.selectionModel().selectedRows())
+        return [self.backups[row] for row in rows if 0 <= row < len(self.backups)]
+
     def selected_backup(self):
-        rows = self.backup_table.selectionModel().selectedRows()
-        if len(rows) == 1 and 0 <= rows[0].row() < len(self.backups):
-            return self.backups[rows[0].row()]
-        return None
+        selected = self.selected_backups()
+        return selected[0] if len(selected) == 1 else None
+
+    def select_backup_paths(self, paths):
+        blocked = self.backup_table.blockSignals(True)
+        self.backup_table.clearSelection()
+        selection = self.backup_table.selectionModel()
+        for index, backup in enumerate(self.backups):
+            if backup['path'] in paths:
+                selection.select(self.backup_table.model().index(index, 0),
+                                 QItemSelectionModel.Select | QItemSelectionModel.Rows)
+        self.backup_table.blockSignals(blocked)
 
     def selection_changed(self):
+        selected_backups = self.selected_backups()
         selected = self.selected_backup()
         self.restore_button.setEnabled(bool(selected and selected['eligible']))
-        self.clear_button.setEnabled(selected is not None)
+        self.clear_button.setEnabled(bool(selected_backups))
+        if len(selected_backups) > 1:
+            self.backup_detail.setPlainText(f'已选中 {len(selected_backups)} 份备份，可一起移到回收站。恢复时请只选择一份。\n\n' +
+                '\n'.join(b['path'] for b in selected_backups))
+            return
         if not selected:
             self.backup_detail.setPlainText('请先选择一条备份，再恢复或清除。' if self.backups else '尚无备份。应用设置后将自动生成。')
             return
@@ -192,17 +206,24 @@ class ManagementPage(QWidget):
             ('可恢复；点击按钮查看逐项修改预览后确认。' if selected['eligible'] else selected['error']))
 
     def clear_selected(self):
-        selected = self.selected_backup()
+        selected = self.selected_backups()
         if not selected or getattr(self.owner, 'busy', False):
             return
         try:
-            snapshot = backup_snapshot(self.owner.backup_dir, selected['path'])
-            path = snapshot['path']
+            snapshots = []
+            for backup in selected:
+                try:
+                    snapshots.append((backup['path'], backup_snapshot(self.owner.backup_dir, backup['path'])))
+                except Exception as exc:
+                    raise ValueError('未清除任何备份；以下文件无法安全校验：\n' + backup['path'] + '\n' + str(exc)) from exc
             dialog = QMessageBox(self)
             dialog.setWindowTitle('清除所选备份')
             dialog.setIcon(QMessageBox.Warning)
             dialog.setTextFormat(Qt.PlainText)
-            dialog.setText('将以下备份文件移到 Windows 回收站？\n\n' + path)
+            dialog.setText(f'将所选的 {len(snapshots)} 份备份文件移到 Windows 回收站？' +
+                           ('\n\n' + snapshots[0][1]['path'] if len(snapshots) == 1 else '\n可展开详细信息查看完整清单。'))
+            if len(snapshots) > 1:
+                dialog.setDetailedText('\n'.join(snapshot['path'] for _, snapshot in snapshots))
             dialog.setInformativeText('清除后无法直接用它恢复设置；需要时可先从回收站还原文件。当前 GPU 设置和其他备份不会改变。')
             dialog.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
             dialog.button(QMessageBox.Yes).setText('移到回收站')
@@ -210,20 +231,36 @@ class ManagementPage(QWidget):
             dialog.setDefaultButton(QMessageBox.No)
             dialog.setEscapeButton(QMessageBox.No)
             self.owner.busy = True
+            succeeded = []
+            failed = []
             try:
                 if dialog.exec() != QMessageBox.Yes:
                     return
-                trash_backup(self.owner.backup_dir, snapshot)
+                for selected_path, snapshot in snapshots:
+                    try:
+                        trash_backup(self.owner.backup_dir, snapshot)
+                    except Exception as exc:
+                        failed.append((selected_path, snapshot['path'], str(exc)))
+                        continue
+                    succeeded.append(snapshot['path'])
+                    last_backup = getattr(self.owner, 'last_backup', None)
+                    if last_backup is not None and Path(last_backup).resolve() == Path(snapshot['path']):
+                        self.owner.last_backup = None
+                        self.owner.last_plan = None
+                        self.owner.restore_button.setEnabled(False)
             finally:
                 self.owner.busy = False
-            last_backup = getattr(self.owner, 'last_backup', None)
-            if last_backup is not None and Path(last_backup).absolute() == Path(path):
-                self.owner.last_backup = None
-                self.owner.last_plan = None
-                self.owner.restore_button.setEnabled(False)
-            self.owner.log('清除备份', '成功', '已移到回收站：' + path)
+            self.select_backup_paths({path for path, _, _ in failed})
             self.refresh_backups()
-            self.backup_detail.setPlainText('已移到 Windows 回收站：\n' + path + '\n\n当前 GPU 设置未改变；如需恢复该备份文件，请先在回收站还原。')
+            summary = f'已移到 Windows 回收站：{len(succeeded)} 份；失败：{len(failed)} 份。'
+            details = summary
+            if succeeded:
+                details += '\n\n已清除：\n' + '\n'.join(succeeded)
+            if failed:
+                details += '\n\n未清除：\n' + '\n\n'.join(path + '\n' + error for _, path, error in failed)
+            details += '\n\n当前 GPU 设置未改变；如需恢复已清除的备份文件，请先在回收站还原。'
+            self.owner.log('清除备份', '部分成功' if failed and succeeded else '失败' if failed else '成功', details)
+            self.backup_detail.setPlainText(details)
         except Exception as exc:
             self.owner.error(exc)
             self.refresh_backups()
