@@ -94,3 +94,11 @@ GPU Selector is a Python/PySide6 Windows utility with a Chinese UI. It manages g
 **2.0.1-beta is the first public test release.** All 122 automated tests and the three real probes passed, including the packaged EXE smoke test. Actual GPU configuration switching, UAC and post-reboot switching behavior have not been tested on a real machine. Probe results apply only to the probe process. Per-app modes express Windows preferences and do not select an arbitrary physical adapter.
 
 Adapted on **2026-09-06** from [nethe-GitHub/select_default_GPU](https://github.com/nethe-GitHub/select_default_GPU), under **AGPL-3.0**. Third-party components retain their own licenses.
+
+## Star 数与增长趋势
+
+[![GitHub Stars](https://img.shields.io/github/stars/Freeze7y/gpu-selector?style=flat&label=Stars)](https://github.com/Freeze7y/gpu-selector)
+
+[![Stargazers over time](https://starchart.cc/Freeze7y/gpu-selector.svg?variant=adaptive)](https://starchart.cc/Freeze7y/gpu-selector)
+
+图表由 [Starchart](https://starchart.cc/Freeze7y/gpu-selector) 提供。若图表因服务限流暂时无法加载，可打开统计页稍后查看；当前 Star 数以上方徽章和 GitHub 仓库显示为准。
