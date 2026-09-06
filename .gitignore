@@ -1,0 +1,45 @@
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Generated build/release and local test artifacts
+/build/
+/dist/
+/work/
+/outputs/
+/third-party/source-archives/
+/smoke*/
+/data/
+*.egg-info/
+*.log
+
+# Local application state can contain account/device IDs and application paths
+backups/
+profiles/
+operations.jsonl
+opengl-reboot.json
+ui.json
+ui.json.tmp
+
+# Local credentials, machine-specific configuration and editor state
+.env
+.env.*
+*.pfx
+*.pem
+*.key
+/.codex/
+/.idea/
+/.vscode/
+Thumbs.db
+Desktop.ini
+
+# probe32 EXE/DLL/ZIP runtime files are intentional distributable source assets.
+# Do not add blanket *.exe, *.dll or *.zip rules.
+!/probe32/*.pyd

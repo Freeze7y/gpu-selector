@@ -1,0 +1,328 @@
+{
+  "scope": "Public v2.0.1-beta binary dependency inventory; exact final EXE hash is provided in the release checksums. License data files excluded.",
+  "qt_build": "Qt 6.11.2 (x86_64-little_endian-llp64 shared (dynamic) release build; by MSVC 2022)",
+  "python_x64": "3.12.14",
+  "python_x86": "3.13.15",
+  "files": [
+    {
+      "path": "PySide6/MSVCP140.dll",
+      "type": "BINARY",
+      "sha256": "4c667b706893593812cd111b369ba6a77f54d1f1b1ae87cf3bf37692663cfba2"
+    },
+    {
+      "path": "PySide6/MSVCP140_1.dll",
+      "type": "BINARY",
+      "sha256": "d419d24b0a76366f5c9d908b0e45fe70e9e9154bb8ad5f3de42070f2337f857b"
+    },
+    {
+      "path": "PySide6/MSVCP140_2.dll",
+      "type": "BINARY",
+      "sha256": "89917964abb6ca16a260cab258e180c3abc239b5af00eed659d0edf0efdd339c"
+    },
+    {
+      "path": "PySide6/Qt6Core.dll",
+      "type": "BINARY",
+      "sha256": "d6a3c37c5263c5d418fc0e80b722bc9fca7c0859e6f635f9624a2fde00bdc653"
+    },
+    {
+      "path": "PySide6/Qt6Gui.dll",
+      "type": "BINARY",
+      "sha256": "ae29b005f51b6850bf57fa06fced0dc8c7039fd6fafc3bfbcfe76e38adc7abf1"
+    },
+    {
+      "path": "PySide6/Qt6Widgets.dll",
+      "type": "BINARY",
+      "sha256": "ff0df9e2e6827e035f0731a4cedfc6333f4602bca00775e56346f27032406b74"
+    },
+    {
+      "path": "PySide6/QtCore.pyd",
+      "type": "EXTENSION",
+      "sha256": "74f96322c5e9cea73aefd2ed5870e5275336b31f552fcd32f12fc81d23f1bc6f"
+    },
+    {
+      "path": "PySide6/QtGui.pyd",
+      "type": "EXTENSION",
+      "sha256": "7bef20046045199c037b7cbfedaa1c5464730fa948b2c9ec8afbf718e63774d4"
+    },
+    {
+      "path": "PySide6/QtWidgets.pyd",
+      "type": "EXTENSION",
+      "sha256": "f12f4ca641998e5706d5f7b0023147d573f0f2d2361e26dadf31bdbf05fbfd1d"
+    },
+    {
+      "path": "PySide6/VCRUNTIME140.dll",
+      "type": "BINARY",
+      "sha256": "f893ae75a1a24eea174d982f94bc80ce2448201eaa919a73c0653a5657685de4"
+    },
+    {
+      "path": "PySide6/VCRUNTIME140_1.dll",
+      "type": "BINARY",
+      "sha256": "48aa2783793ea18ab3c2c71d420d4fff9814e662a1ff810053c6e5250061a716"
+    },
+    {
+      "path": "PySide6/plugins/imageformats/qico.dll",
+      "type": "BINARY",
+      "sha256": "1684fd56f1758167f7b3ac011264ae5859b3cf6113e381626ec3dc1d3122fe52"
+    },
+    {
+      "path": "PySide6/plugins/imageformats/qjpeg.dll",
+      "type": "BINARY",
+      "sha256": "6517345ac19f5c489daeadc029d0018bbdc09d8e1031c60d714557972f22c6d4"
+    },
+    {
+      "path": "PySide6/plugins/platforms/qoffscreen.dll",
+      "type": "BINARY",
+      "sha256": "e776251668440169ed18a2fe1b236762d514ef5244639cbb559b5a77ddd38954"
+    },
+    {
+      "path": "PySide6/plugins/platforms/qwindows.dll",
+      "type": "BINARY",
+      "sha256": "bf6dbc3009f386fa22f0ced560bea6bbf3e0e0b4442d2fb855db67cffce49dbf"
+    },
+    {
+      "path": "PySide6/pyside6.abi3.dll",
+      "type": "BINARY",
+      "sha256": "d0b5c701fb3a8ea839e72b602058f3960935156ebeca084893c54c99e54dd707"
+    },
+    {
+      "path": "VCRUNTIME140.dll",
+      "type": "BINARY",
+      "sha256": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066"
+    },
+    {
+      "path": "VCRUNTIME140_1.dll",
+      "type": "BINARY",
+      "sha256": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f"
+    },
+    {
+      "path": "_bz2.pyd",
+      "type": "EXTENSION",
+      "sha256": "e1254c0118a3add01c3b40b95659e6ea32b54a1839d96ac0e950c4de8d95aa49"
+    },
+    {
+      "path": "_ctypes.pyd",
+      "type": "EXTENSION",
+      "sha256": "1d53cd3abbc940dd3025233795a963ec397ee4a5427284aeda0d1963d94716d7"
+    },
+    {
+      "path": "_decimal.pyd",
+      "type": "EXTENSION",
+      "sha256": "7650a1b328e97fd31bf8269197906630698d86e18866187bec256398630071a1"
+    },
+    {
+      "path": "_lzma.pyd",
+      "type": "EXTENSION",
+      "sha256": "c91e1e8b8408ea22cff55b32dee68689536767a7d7bd72de6be30ed7bed4240e"
+    },
+    {
+      "path": "_socket.pyd",
+      "type": "EXTENSION",
+      "sha256": "0bf04771238d41aae86e9e3c279d6774aad2e381cb7280b95a879b26d3153d15"
+    },
+    {
+      "path": "_uuid.pyd",
+      "type": "EXTENSION",
+      "sha256": "a98b054e4a9a8ae1db6ccca1c8d539f60a580efbc01ee01fb6c41f9ac7503a13"
+    },
+    {
+      "path": "_wmi.pyd",
+      "type": "EXTENSION",
+      "sha256": "d50b7b83806d68e304d652d8223671e9e04c8bd3728d6045e2dedf3789e8ba7d"
+    },
+    {
+      "path": "libffi-8.dll",
+      "type": "BINARY",
+      "sha256": "2623cd5cfcbfe45ed07a49091d5b73f85655c5d12749945a0cc1d0a93cf572d9"
+    },
+    {
+      "path": "probe32/_asyncio.pyd",
+      "type": "DATA",
+      "sha256": "c17d4b66728f5541cbc9b7b666bceca0c701d39036d75a0586493b131d5cf777"
+    },
+    {
+      "path": "probe32/_bz2.pyd",
+      "type": "DATA",
+      "sha256": "2c3da2b8d1027275986be4a89f2646faecdbd898f6ac919ce51309f59dfe965a"
+    },
+    {
+      "path": "probe32/_ctypes.pyd",
+      "type": "DATA",
+      "sha256": "af93215c2d382cbe14c2b4fb80dfb7106f4de3231554576d0ddde44cf494538c"
+    },
+    {
+      "path": "probe32/_decimal.pyd",
+      "type": "DATA",
+      "sha256": "ab0555a35f7aae60c97d3bb411b0d7ab985d9dc32c23e8b829c5be5e2dfa3898"
+    },
+    {
+      "path": "probe32/_elementtree.pyd",
+      "type": "DATA",
+      "sha256": "92575c7707e4fe9f858b7b06ef9814e215162510ca2613f816299cc52315ab83"
+    },
+    {
+      "path": "probe32/_hashlib.pyd",
+      "type": "DATA",
+      "sha256": "e3fbefe0f3720ac4876d263b75be3e4a602935b6cbf2cd313d67c7c574f2e61d"
+    },
+    {
+      "path": "probe32/_lzma.pyd",
+      "type": "DATA",
+      "sha256": "a2d365c9a574f9058b275719caffacc9c9f3a25bb609bef08fe68f63b746917c"
+    },
+    {
+      "path": "probe32/_multiprocessing.pyd",
+      "type": "DATA",
+      "sha256": "92a200c2320407544525bfb6a4ef9674c1445e0d0e05fdc423181e02cb191e4b"
+    },
+    {
+      "path": "probe32/_overlapped.pyd",
+      "type": "DATA",
+      "sha256": "010268211c63f4854bca1ae26ee31844132beb9cb1fb326a35691edaed2fd1db"
+    },
+    {
+      "path": "probe32/_queue.pyd",
+      "type": "DATA",
+      "sha256": "b14829c4015be3d21522566ab2c493b395590bddd55513943dbdf924f900db6e"
+    },
+    {
+      "path": "probe32/_socket.pyd",
+      "type": "DATA",
+      "sha256": "083fe9c3febe2f3bc7c1b8b14fe794a63461e461a0c5d80ddcd8ac3f150c16f6"
+    },
+    {
+      "path": "probe32/_sqlite3.pyd",
+      "type": "DATA",
+      "sha256": "7ff5942f8632d2f47352f2821ec2dfea31e143a2a347aafbdf292cf554dddc47"
+    },
+    {
+      "path": "probe32/_ssl.pyd",
+      "type": "DATA",
+      "sha256": "09772fca923b9769a40c2c903813ef1fca07bd8c4ffa93bef13579b28ff8a73c"
+    },
+    {
+      "path": "probe32/_uuid.pyd",
+      "type": "DATA",
+      "sha256": "89c3631256c5efc0d64bbe6c9e1b3f3b05fda7a421a680f9c823d6dee8fbc972"
+    },
+    {
+      "path": "probe32/_wmi.pyd",
+      "type": "DATA",
+      "sha256": "ab26ccdaa2158ccd699fe21ff3f7a272c685e8eb18400a0aceeb91e3a3918843"
+    },
+    {
+      "path": "probe32/_zoneinfo.pyd",
+      "type": "DATA",
+      "sha256": "ff8301710f6645e68c81cd296ca9c819fd866825001924257a24fa4ee04e88b2"
+    },
+    {
+      "path": "probe32/libcrypto-3.dll",
+      "type": "DATA",
+      "sha256": "2c44ac0c4bac747d0e69e3fd66a3a537521bae7587a1d24a6fa6248519634e10"
+    },
+    {
+      "path": "probe32/libffi-8.dll",
+      "type": "DATA",
+      "sha256": "b982741576a050860c3f3608c7b269dbd35ab296429192b8afa53f1f190069c0"
+    },
+    {
+      "path": "probe32/libssl-3.dll",
+      "type": "DATA",
+      "sha256": "d645263c9a65d3af98279c6c99061902902e84111e5c7c3c69d88180932972f8"
+    },
+    {
+      "path": "probe32/pyexpat.pyd",
+      "type": "DATA",
+      "sha256": "55ad21b410a3c3843cdc2bdee4c17648fae1b319e300df58e2ba7993cc821f2c"
+    },
+    {
+      "path": "probe32/python.exe",
+      "type": "DATA",
+      "sha256": "b1249b420d41362c81c87a578209ebf0db4a64b26d540d148e2470225a9d108c"
+    },
+    {
+      "path": "probe32/python3.dll",
+      "type": "DATA",
+      "sha256": "10fed487a3b57b14cd77fe08344f463c8549a970aaacd674b4cb3a40e28d4776"
+    },
+    {
+      "path": "probe32/python313.dll",
+      "type": "DATA",
+      "sha256": "7ce3478650513f211d595825ea9c6ed7e503f522fb30cd6bee2d5fe9b3086acc"
+    },
+    {
+      "path": "probe32/pythonw.exe",
+      "type": "DATA",
+      "sha256": "1d2700f7f248a10181058b2d759e6122daa46499b0cdf52706be3b6a498a7ad8"
+    },
+    {
+      "path": "probe32/select.pyd",
+      "type": "DATA",
+      "sha256": "7e04054118fb9871e25e7eee88296a6016d2c55546b2b7770a8e44e06f51fdf1"
+    },
+    {
+      "path": "probe32/sqlite3.dll",
+      "type": "DATA",
+      "sha256": "ec49ef0f47d3d876e52f4f096230c097da789f435c11be6d87ca5d39a9a9a75e"
+    },
+    {
+      "path": "probe32/unicodedata.pyd",
+      "type": "DATA",
+      "sha256": "6dc5b7f11a0ad7dbe0d6ee4f58bda7ed8e892644d50f99b2416b3a559f507033"
+    },
+    {
+      "path": "probe32/vcruntime140.dll",
+      "type": "DATA",
+      "sha256": "2fa6efc053203460a23d3a25158f227d895d2dadc63acc1a372da97c3a4281c3"
+    },
+    {
+      "path": "probe32/winsound.pyd",
+      "type": "DATA",
+      "sha256": "1b6b04285fccc549e1cb10290351550f7ca6aca98bd30a1432970742b8611df3"
+    },
+    {
+      "path": "python3.dll",
+      "type": "BINARY",
+      "sha256": "5321bba2d7f95c6bca9a19fd8e0415ca850b2cf85c8c1711c605f9932e9c2826"
+    },
+    {
+      "path": "python312.dll",
+      "type": "BINARY",
+      "sha256": "baa2a3924bc1309284d0a720ccd213f37002fbda82d5761a61ddee8c4c31f608"
+    },
+    {
+      "path": "select.pyd",
+      "type": "EXTENSION",
+      "sha256": "56e5cc5a90e8647a0805bfdf10444688c934e68f46f19c27045516dd3d533c3a"
+    },
+    {
+      "path": "shiboken6/MSVCP140.dll",
+      "type": "BINARY",
+      "sha256": "fd4a8c046fa3fea9ca6132f50cf8a56cf1e783b2d3093ba5c85fa063bc6b3845"
+    },
+    {
+      "path": "shiboken6/Shiboken.pyd",
+      "type": "EXTENSION",
+      "sha256": "2f6f3a694f675b1dafdae26903191613c02866ab48e02591ae34ca1a3b1284f1"
+    },
+    {
+      "path": "shiboken6/VCRUNTIME140.dll",
+      "type": "BINARY",
+      "sha256": "de617641d82eac15595d2e39394163ac33e49bb032cf2c2ea0044ed39d3675e9"
+    },
+    {
+      "path": "shiboken6/VCRUNTIME140_1.dll",
+      "type": "BINARY",
+      "sha256": "fa577d54bd10a91e52472da784a619da6cf241af45f0a0c48b27e91fa0fe6104"
+    },
+    {
+      "path": "shiboken6/shiboken6.abi3.dll",
+      "type": "BINARY",
+      "sha256": "de3c6b2ed5f75c9ac0de4a6844b653b3b9d09263ce68c2b5fc25a96c5c3e8469"
+    },
+    {
+      "path": "unicodedata.pyd",
+      "type": "EXTENSION",
+      "sha256": "dbb5e8f071d322c9edbd9bf24b5360230975235122850bb66cd7da3de18a445d"
+    }
+  ]
+}
