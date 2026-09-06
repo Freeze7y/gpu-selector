@@ -70,6 +70,7 @@ class ManagementTests(unittest.TestCase):
         plan = ['approved-plan']
         with patch('management_page.restore_plan', return_value=plan), patch('management_page.health_rows', return_value=[]):
             self.page.refresh_backups()
+            self.page.backup_table.selectRow(0)
             self.page.restore_selected()
         self.owner.refresh.assert_called_once()
         self.owner.execute.assert_called_once_with(plan, 'History-Restore')
@@ -79,6 +80,7 @@ class ManagementTests(unittest.TestCase):
         self.backup()
         with patch('management_page.restore_plan', return_value=['plan']):
             self.page.refresh_backups()
+            self.page.backup_table.selectRow(0)
         with patch('management_page.restore_plan', side_effect=ValueError('设置已变化')), patch('management_page.health_rows', return_value=[]):
             self.page.restore_selected()
         self.owner.execute.assert_not_called()
@@ -90,6 +92,7 @@ class ManagementTests(unittest.TestCase):
         self.owner.refresh.return_value = False
         with patch('management_page.restore_plan', return_value=['plan']), patch('management_page.health_rows', return_value=[]):
             self.page.refresh_backups()
+            self.page.backup_table.selectRow(0)
             self.page.restore_selected()
         self.owner.execute.assert_not_called()
 

@@ -1,6 +1,6 @@
 # GPU Selector · 默认显卡选择器
 
-**2.0.2-beta · 公开测试版 · Windows x64**
+**2.1.0 · 正式版 · Windows x64**
 
 用 Python 和 PySide6 编写的中文图形界面工具，管理 Windows GPU 偏好、查看当前设置，并通过独立探针检查实际渲染设备。基于 [nethe-GitHub/select_default_GPU](https://github.com/nethe-GitHub/select_default_GPU) 改编，保留原工具的 Windows 图形设置、DirectX 默认高性能显卡、OpenGL ICD 选择及 BAT 导出功能。
 
@@ -16,6 +16,8 @@
 - **实际探针**：分别检测 32 位和 64 位 OpenGL 渲染器；创建 Direct3D 11 默认硬件设备并执行离屏清色及像素回读。
 - **修改预览与恢复**：显示修改前后差异，检测预览期间的外部更改；修改前备份、修改后读回，失败时尝试回滚并校验。
 - **状态管理**：备份列表、操作日志导出、OpenGL 重启状态、显卡驱动版本和设备问题代码。
+- **备份清理**：手动选中不需要的备份，确认后移到 Windows 回收站；不改变 GPU 设置，不会自动清除暂时无法恢复的备份。
+- **在线更新**：手动检查 GitHub 新版本；首次启动可选择开启启动检查，发现新版先确认再下载、校验、覆盖并重启。正式版只提示更新的正式版本。
 - **配置与界面**：命名方案、设备及驱动匹配检查、深浅主题、字体大小、窗口位置与大小记忆，支持缩放和小窗口滚动。
 - **离线许可**：“外观与说明 → 查看开源许可证与第三方声明”可直接查看随 EXE 附带的许可文本。
 
@@ -26,6 +28,10 @@
 3. OpenGL 系统修改需要管理员权限。重新以管理员身份运行后，仍需再次选择并确认；首次采用原工具的 OpenGL 方法需要重启。
 4. 应用偏好修改后，完整退出并重新启动目标程序，再运行探针或通过任务管理器的“GPU 引擎”列检查该程序。
 5. 在“配置方案”保存常用设置；在“备份与日志”检查恢复资格、预览并恢复备份，或导出操作日志。
+6. 在“备份与日志 → 备份管理”选择一条备份，点击“清除所选备份…”并核对文件名，即可移到回收站。恢复资格不代表备份是否有用；旧备份可能在恢复较新备份后重新符合恢复条件。
+7. 在“外观与说明”点击“检查更新”或调整启动检查开关。更新保留数据目录中的设置、备份和日志；详细流程与故障处理见 [在线更新说明](docs/UPDATING.md)。右上角可打开作者 Freeze7y 的 GitHub 仓库。
+
+<img src="docs/images/backup-management.png" alt="备份管理与清除按钮，备份和路径为演示数据" width="900">
 
 列表中的“文件不存在”表示记录的 EXE 路径目前找不到，常见于程序移动、卸载或盘符变化。选中确认不再使用的条目，点击 **“清除所选路径…”**，检查完整路径及修改预览后确认即可。该操作删除此路径的整条图形设置记录，包括 GPU 偏好、Auto HDR、窗口化优化等参数；**不会删除 EXE 或文件夹**。“恢复自动选择”只移除 GPU 指定，其他参数仍会保留，因此记录可能继续显示。
 
@@ -35,17 +41,19 @@
 
 Win10 优先验证目标为 **22H2 x64**。当前构建依赖的 Qt 6.11 支持 Windows 10 1809 及以上 x64；这表示运行环境满足依赖要求，不代表所有全局图形设置在各 Win10 版本和驱动上都有效。兼容性检查范围、官方依据及实机验证步骤见 [Windows 10 兼容性说明](docs/WINDOWS10_COMPATIBILITY.md)。目前尚未在 Windows 10 实机或虚拟机运行本版，暂不单独发布 Win10 专用包。
 
-默认数据目录为 `%LOCALAPPDATA%\GPUSelector`，包含 `backups/`、`profiles/`、`operations.jsonl`、`opengl-reboot.json` 和 `ui.json`。数据保存在本机，不会自动上传。
+默认数据目录为 `%LOCALAPPDATA%\GPUSelector`，包含 `backups/`、`profiles/`、`operations.jsonl`、`opengl-reboot.json` 和 `ui.json`。更新文件另存于该目录中的更新缓存。GPU 设置、应用路径、备份和日志不会上传；检查更新只访问公开 GitHub 发布信息与下载文件。
 
 ## 验证范围与限制
 
 这个版本已完成：
 
-- **150 项自动化测试**，覆盖注册表操作计划、回滚与恢复、应用偏好、路径清除与选择保护、方案匹配、探针、日志、重启状态和界面交互。
+- **255 项自动化测试**，覆盖注册表操作计划、回滚与恢复、应用偏好、路径与备份清除、GitHub 版本检查、下载校验、更新安装与失败恢复、探针和界面交互。
 - 源码及打包 EXE 的 `--smoke-all` 检查：32 位 OpenGL、64 位 OpenGL、Direct3D 11 三个实际探针均通过，成品测试退出码为 0。
 - Direct3D 11 离屏清色后的像素回读；界面页面、小窗口、主题和字体适配检查。
+- 使用隔离的旧版与新版 EXE 副本实际验证更新握手、中文和空格路径、文件占用重试、原位覆盖与新界面启动；配置方案、备份和日志测试文件保持不变。
+- 故意阻止新版启动确认后，已验证自动恢复并重启旧版；配置方案与备份保持原样，原日志完整保留并追加故障记录。
 
-**尚未实机验证真实显卡配置切换、UAC 授权流程和重启后的切换效果。**测试没有修改真实 GPU 配置；真实写入、失败回滚和恢复逻辑使用模拟注册表验证。因此本版以公开测试版发布。
+**尚未实机验证真实显卡配置切换、UAC 授权流程和重启后的切换效果。**测试没有修改真实 GPU 配置；注册表写入、失败回滚和恢复逻辑使用模拟注册表验证。Windows 10 的检查范围见上文。
 
 使用时请区分以下结果：
 
@@ -94,13 +102,13 @@ Get-Content -LiteralPath (Join-Path $gpuSmoke 'results.json')
 
 本项目按 **GNU Affero General Public License v3.0（AGPL-3.0）** 提供，完整文本见 [LICENSE](LICENSE)。以前内部版本中出现的“GPL-3.0”文字为标注错误，本公开版已更正为 AGPL-3.0。第三方组件保留各自许可证；随附 Python 运行时的许可证见 `probe32/LICENSE.txt`，其他随附许可和说明见 `third-party/THIRD_PARTY_NOTICES.md` 及该目录中的许可文件。
 
-Qt / PySide6 6.11.2 按 LGPLv3 使用；对应源码压缩包随 [v2.0.2-beta Release](https://github.com/Freeze7y/gpu-selector/releases/tag/v2.0.2-beta) 提供。可按本仓库构建步骤重新构建程序，并依第三方说明替换或重建库。本程序按现状提供，不提供担保。
+Qt / PySide6 6.11.2 按 LGPLv3 使用；对应源码压缩包随 [v2.1.0 Release](https://github.com/Freeze7y/gpu-selector/releases/tag/v2.1.0) 提供。可按本仓库构建步骤重新构建程序，并依第三方说明替换或重建库。本程序按现状提供，不提供担保。
 
 ## English
 
 GPU Selector is a Python/PySide6 Windows utility with a Chinese UI. It manages global and per-EXE GPU preferences, previews and backs up changes, and runs separate 32-bit OpenGL, 64-bit OpenGL and Direct3D 11 probes. Download the standalone EXE from [Releases](https://github.com/Freeze7y/gpu-selector/releases); Python is only needed to build from source.
 
-**2.0.2-beta adds complete removal of selected per-app settings**, with preview, backup and read-back verification. It never deletes application files. All automated tests and the three real probes passed, including the packaged EXE smoke test. Actual GPU configuration switching, UAC, post-reboot switching and execution on Windows 10 remain untested. See the [Windows 10 compatibility notes](docs/WINDOWS10_COMPATIBILITY.md). Probe results apply only to the probe process. Per-app modes express Windows preferences and do not select an arbitrary physical adapter.
+**2.1.0 is a stable release** adding backup cleanup through the Windows Recycle Bin, GitHub update checks and verified in-place EXE updates. Startup checks are opt-in and each available update requires confirmation. Stable installations stay on the stable release channel. Settings, profiles and GPU backups are preserved. Actual GPU configuration switching, UAC, post-reboot switching and execution on Windows 10 remain untested; see the [compatibility notes](docs/WINDOWS10_COMPATIBILITY.md). Probe results apply only to the probe process.
 
 Adapted on **2026-09-06** from [nethe-GitHub/select_default_GPU](https://github.com/nethe-GitHub/select_default_GPU), under **AGPL-3.0**. Third-party components retain their own licenses.
 

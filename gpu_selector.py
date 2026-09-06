@@ -13,12 +13,14 @@ from PySide6.QtCore import Qt, QTimer, QProcess, QByteArray
 from PySide6.QtGui import QFont, QIcon
 from PySide6.QtWidgets import (QApplication, QComboBox, QFileDialog, QFrame,
     QHBoxLayout, QLabel, QMainWindow, QMessageBox, QPushButton, QScrollArea,
-    QTabWidget, QTextEdit, QVBoxLayout, QWidget, QSpinBox, QDialog, QGridLayout)
+    QTabWidget, QTextEdit, QVBoxLayout, QWidget, QSpinBox, QDialog, QGridLayout, QSizePolicy)
 from gpu_core import (Registry, adapters, apply_plan, check_plan, dx_plan, dx_target,
                       dx_matches, dx_reset_plan, export_bat, gl_plan, gl_preflight,
                       report, restore_plan, settings_plan, validate_operations)
 from change_preview import PreviewDialog, capture_before
 from ui_preferences import load_preferences, save_preferences, style_for
+from app_version import VERSION
+from update_ui import UpdatePanel
 
 HERE = Path(getattr(sys, '_MEIPASS', Path(__file__).parent))
 DATA_DIR = Path(os.environ.get('GPU_SELECTOR_DATA_DIR', str(Path(os.environ.get('LOCALAPPDATA', str(Path.home()))) / 'GPUSelector')))
@@ -102,7 +104,7 @@ class Window(QMainWindow):
         self.probe_kind = 'gl64'
         self.probe_results = {}
         self.busy = False
-        self.setWindowTitle('GPU 控制台 2.0.2-beta · 默认显卡选择器')
+        self.setWindowTitle(f'GPU 控制台 {VERSION} · 默认显卡选择器')
         self.setWindowIcon(QIcon(str(HERE / 'gpu.ico')))
         area = QApplication.primaryScreen().availableGeometry()
         self.resize(min(1100, int(area.width() * .85)), min(900, int(area.height() * .87)))
@@ -112,7 +114,16 @@ class Window(QMainWindow):
         outer.setContentsMargins(26, 22, 26, 18)
         outer.setSpacing(12)
         self.eyebrow = label('GPU SELECTOR  /  WINDOWS', 'eyebrow')
-        outer.addWidget(self.eyebrow)
+        author_row = QHBoxLayout()
+        author_row.addWidget(self.eyebrow, 1)
+        self.author_link = QLabel()
+        self.author_link.setTextFormat(Qt.RichText)
+        self.author_link.setOpenExternalLinks(True)
+        self.author_link.setWordWrap(True)
+        self.author_link.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
+        self.author_link.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        author_row.addWidget(self.author_link, 1)
+        outer.addLayout(author_row)
         self.heading = label('让每一次渲染，各就其位。', 'heading')
         outer.addWidget(self.heading)
         self.subtitle = label('默认显卡选择器   ·   DirectX / OpenGL   ·   实时读取系统配置', 'subtitle')
@@ -187,10 +198,12 @@ class Window(QMainWindow):
         appearance.addWidget(self.font_spin)
         appearance.addStretch()
         help_layout.addLayout(appearance)
+        self.update_panel = UpdatePanel(self)
+        help_layout.addWidget(self.update_panel)
         help_text = QTextEdit()
         help_text.setReadOnly(True)
         help_text.setMinimumHeight(180)
-        help_text.setPlainText("""使用说明 · 2.0.2-beta
+        help_text.setPlainText(f"""使用说明 · {VERSION}
 
 本项目基于 nethe-GitHub/select_default_GPU 改编。
 原项目：https://github.com/nethe-GitHub/select_default_GPU
@@ -219,12 +232,21 @@ Python 图形界面与功能扩展，修改日期：2026-09-06。
 备份、日志与健康
 
 备份列表显示时间、操作、目标及能否恢复。恢复前核对用户、电脑、相关驱动与当前值；损坏文件单独显示错误。操作日志可以导出。设备健康页显示驱动版本、是否禁用和问题代码；“无问题代码”不等于完整硬件检测通过。
+不再需要的备份可选中后“清除所选备份”，确认后移到 Windows 回收站。暂时不可恢复不代表没有用；清除不会改变当前 GPU 设置。
 
 OpenGL 修改或恢复后记录重启状态。睡眠、快速启动和系统时间调整会影响判断，无法确认时显示未知，不会自动重启。
 
 外观
 
 可切换深浅主题、调整字体大小。正常关闭时记住窗口大小和位置；旧显示器移除后自动放回可见区域。
+
+软件更新
+
+点击“检查更新”读取本 GitHub 仓库的新版本。首次启动可选择是否开启启动检查，发现新版先确认再下载；正式版只提示更高正式版本。下载大小及 SHA-256 校验通过后，程序退出、覆盖并重新启动，保留原设置、备份和日志。源码运行只提供下载指引，不覆盖 Python 源码。
+
+软件更新
+
+首次启动会询问是否启用启动检查，并记住选择。启用后每次启动连接 GitHub 检查版本；发现新版仍需确认，之后才下载、校验并准备替换和重启。也可以手动检查或关闭启动检查。源码运行仅提示到发布页下载 EXE，不会覆盖源码。
 
 注意
 
@@ -670,6 +692,9 @@ OpenGL 修改或恢复后记录重启状态。睡眠、快速启动和系统时�
         self.preferences.update(theme=theme, font_size=size)
         QApplication.instance().setFont(QFont('Microsoft YaHei UI', size))
         QApplication.instance().setStyleSheet(style_for(STYLE, theme, size))
+        link_color = '#9ccbff' if theme == 'dark' else '#175f9a'
+        self.author_link.setText('作者：Freeze7y<br><a style="color:' + link_color + '" href="https://github.com/Freeze7y/gpu-selector">github.com/Freeze7y/gpu-selector</a>')
+        self.update_panel.release_link.setText('<a style="color:' + link_color + '" href="https://github.com/Freeze7y/gpu-selector/releases">查看 GitHub 发布页</a>')
 
     def restore_window(self):
         geometry = self.preferences.get('geometry')
@@ -691,6 +716,9 @@ OpenGL 修改或恢复后记录重启状态。睡眠、快速启动和系统时�
         super().resizeEvent(event)
 
     def closeEvent(self, event):
+        if not self.update_panel.prepare_close():
+            event.ignore()
+            return
         if self.probe_process is not None:
             # Keep the event loop running until the isolated process exits.
             event.ignore()
@@ -707,6 +735,10 @@ OpenGL 修改或恢复后记录重启状态。睡眠、快速启动和系统时�
 
 
 def main():
+    if '--apply-update' in sys.argv:
+        from update_installer import run_update_helper
+        job = Path(sys.argv[sys.argv.index('--apply-update') + 1])
+        sys.exit(run_update_helper(job))
     if '--probe-dx' in sys.argv:
         from dx_probe import probe
         destination = Path(sys.argv[sys.argv.index('--probe-dx') + 1])
@@ -727,13 +759,29 @@ def main():
     app.setFont(QFont('Microsoft YaHei UI', 10))
     app.setStyleSheet(STYLE)
     smoke_all = Path(sys.argv[sys.argv.index('--smoke-all') + 1]) if '--smoke-all' in sys.argv else None
-    window = Window(data_dir=smoke_all / 'data' if smoke_all else None)
+    completed_update = Path(sys.argv[sys.argv.index('--update-complete') + 1]) if '--update-complete' in sys.argv else None
+    update_folder = None
+    if completed_update is not None:
+        from update_installer import update_data_dir, mark_update_ready
+        update_folder = update_data_dir(completed_update)
+    window = Window(data_dir=smoke_all / 'data' if smoke_all else update_folder)
     if '--select-gl' in sys.argv:
         key = sys.argv[sys.argv.index('--select-gl') + 1]
         index = window.gl_combo.findData(key)
         if index >= 0:
             window.gl_combo.setCurrentIndex(index)
     window.show()
+    if completed_update is not None:
+        def confirm_update_start():
+            try:
+                mark_update_ready(completed_update)
+                window.update_panel.status.setText('已更新至 ' + VERSION + '，程序启动验证已通过。')
+            except Exception as exc:
+                window.update_panel.status.setText('更新启动验证失败：' + str(exc))
+                window.log('软件更新', '启动验证失败', str(exc))
+        QTimer.singleShot(300, confirm_update_start)
+    if not smoke_all and '--smoke-test' not in sys.argv:
+        QTimer.singleShot(0, window.update_panel.startup)
     if smoke_all:
         smoke_all.mkdir(parents=True, exist_ok=True)
         kinds = ['gl64', 'gl32', 'dx']

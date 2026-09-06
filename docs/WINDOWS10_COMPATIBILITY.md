@@ -1,6 +1,6 @@
 # Windows 10 兼容性审计
 
-审计日期：2026-09-07。对象：v2.0.2-beta 的 Python 源码、`GPUSelector.spec`、新生成的 x64 EXE，以及本次构建清单中的运行时依赖。已直接读取新 EXE 内嵌归档，逐项核对 64 个依赖文件的 SHA-256 和架构，并重新检查新 EXE 的导入表与 manifest。
+审计日期：2026-09-07。对象：v2.1.0 的 Python 源码、`GPUSelector.spec`、新生成的 x64 EXE，以及本次构建清单中的运行时依赖。先读取 EXE 内嵌的 `app_version.VERSION` 确认其为 2.1.0，再逐项提取 64 个依赖 PE 文件核对 SHA-256 和架构，并重新检查新 EXE 的导入表与 manifest。
 
 **目前没有发现要求 Windows 11 才能启动的明确二进制依赖；现有版本应优先在 Windows 10 22H2 x64（build 19045）上验证。Qt 6.11 的官方框架支持下限是 Windows 10 1809 x64（build 17763），但这不等于本程序全部显卡设置功能已在这些系统上验证。当前没有证据需要另做一份 Windows 10 专用 EXE。**
 
@@ -24,8 +24,12 @@
 | PyInstaller 6.22.2 | 主程序为原生 x64 bootloader；probe32 作为 DATA 保持 x86 文件不变 | 官方要求 Windows 8 或更新；不会单独把本包下限提高到 Windows 11。其他依赖的较高下限仍然适用。[PyInstaller 要求](https://pyinstaller.org/en/stable/requirements.html) |
 | Qt 系统 ICU | `Qt6Core.dll` 导入 `icuuc.dll` 的 20 个传统字符转换 C 接口；未导入新合并的 `icu.dll` | 微软从 Windows 10 1703 内置 `icuuc.dll` / `icuin.dll`；`icu.dll` 则从 1903 才有。当前导入形式没有造成 1809 的已知 DLL 缺失问题，未发现 Win11 专用 ICU 入口。[微软 ICU 说明](https://learn.microsoft.com/en-us/windows/win32/intl/international-components-for-unicode--icu-) |
 | UCRT、API-set、VC Runtime | UCRT / API-set 由系统提供；所需 VC Runtime 随包分发；x86 运行时独立 | 需要完整、正常更新的 Windows 安装。没有将构建机 Windows 11 的 ICU、UCRT 或 API-set 转发 DLL 复制进主程序包。 |
+| 在线更新的 WinHTTP | 通过 ctypes 从 System32 加载系统 `winhttp.dll`；使用 TLS 1.2、系统证书校验和系统代理 | 所用自动代理模式从 Windows 8.1 起受支持，不会把当前 Qt 的 Windows 10 1809 下限提高到 Windows 11。未为在线更新新增 QtNetwork 或 x64 OpenSSL。[WinHttpOpen 与自动代理](https://learn.microsoft.com/en-us/windows/win32/api/winhttp/nf-winhttp-winhttpopen) |
+| 备份回收站 | 调用 QtCore 的 `QFile.moveToTrash()`，使用操作系统回收站机制；失败时报告错误，不退回永久删除 | Qt 说明该操作通过当前系统的回收站机制完成；具体路径、权限和回收站设置仍需在目标 Windows 10 上验证。[QFile 回收站 API](https://doc.qt.io/qt-6/qfile.html#moveToTrash) |
 
-新 EXE 内嵌的 **64 个依赖 PE 文件：35 个 AMD64 文件和 29 个位于 `probe32` 的 x86 文件**，其 SHA-256 全部符合 `third-party/BUNDLED_COMPONENTS.json`，架构与前次审计一致，未发现清单外的 PE 依赖。35 个主运行时依赖与本次 Analysis 清单中的源文件哈希一致；29 个 x86 文件仍通过 Analysis 之后的独立 DATA 注入打包。新主 EXE 的导入表和 manifest 与前次审计一致。PE 头的最高 OS / subsystem 字段是 6.0；这个字段不能证明 Windows Vista 或旧 Windows 10 版本兼容，真正下限还受 DLL 导出、运行时动态加载和框架要求限制。
+新 EXE 内嵌的 **64 个依赖 PE 文件：35 个 AMD64 文件和 29 个位于 `probe32` 的 x86 文件**，其 SHA-256 全部符合 `third-party/BUNDLED_COMPONENTS.json`，与前次审计相比没有新增、删除或改变 PE 文件。35 个主运行时依赖与本次 Analysis 清单中的源文件哈希一致；29 个 x86 文件仍通过 Analysis 之后的独立 DATA 注入打包。新主 EXE 的导入表与前次审计一致，manifest 仍包含 Windows 10 支持声明。PE 头的最高 OS / subsystem 字段是 6.0；这个字段不能证明 Windows Vista 或旧 Windows 10 版本兼容，真正下限还受 DLL 导出、运行时动态加载和框架要求限制。
+
+SHA-256 等摘要实现所需的 `_sha2`、`_sha1`、`_md5`、`_sha3`、`_blake2` 已内建于本次使用的 CPython 主运行时，无需新增独立 x64 PE 模块。现有 CPython 与 HACL 许可文本已随包分发；本次未识别出新增的第三方许可组件。系统 WinHTTP 本身没有复制进发行包。
 
 重点检查中发现的较新入口仍属于 Windows 10 或更早版本：
 
@@ -66,5 +70,6 @@ OpenGL 的 `wglCreateContext` 是长期提供的 Windows API，D3D11 探针采�
 3. 执行 `--smoke-all` 并保留报告，分别核对 64 位 OpenGL、32 位 OpenGL、D3D11 的位数、renderer、退出码和异常提示。纯虚拟机可以验证启动及错误处理，但可能没有厂商 GPU 驱动。
 4. 在实体多 GPU Windows 10 机器上，对专用测试程序写入 / 恢复按应用偏好；核对 Windows 设置页，重启该测试程序，观察实际用卡。记录应用自行选择 GPU 的情况。
 5. 在已有可恢复备份的实体机器上单独验证全局配置和 OpenGL 驱动配置；测试重启前后、32/64 位差异与完整恢复。未验证前保留“配置一致”和“实际渲染”的状态区别。
+6. 在 Windows 10 上测试在线更新的系统代理、断网、取消、文件校验、覆盖与恢复，以及备份移入回收站。当前 Windows 11 上的真实 GitHub 下载校验结果，不能替代这些 Windows 10 测试。
 
 发布描述建议采用：**“Windows 10 1809+ x64 为框架支持范围；优先适配目标 Windows 10 22H2 x64。当前已完成静态兼容审计，Windows 10 实机结果待补充；全局 GPU 配置效果受系统版本、驱动及应用行为影响。”**
