@@ -102,7 +102,7 @@ class Window(QMainWindow):
         self.probe_kind = 'gl64'
         self.probe_results = {}
         self.busy = False
-        self.setWindowTitle('GPU 控制台 2.0.1-beta · 默认显卡选择器')
+        self.setWindowTitle('GPU 控制台 2.0.2-beta · 默认显卡选择器')
         self.setWindowIcon(QIcon(str(HERE / 'gpu.ico')))
         area = QApplication.primaryScreen().availableGeometry()
         self.resize(min(1100, int(area.width() * .85)), min(900, int(area.height() * .87)))
@@ -190,7 +190,7 @@ class Window(QMainWindow):
         help_text = QTextEdit()
         help_text.setReadOnly(True)
         help_text.setMinimumHeight(180)
-        help_text.setPlainText("""使用说明 · 2.0.1-beta
+        help_text.setPlainText("""使用说明 · 2.0.2-beta
 
 本项目基于 nethe-GitHub/select_default_GPU 改编。
 原项目：https://github.com/nethe-GitHub/select_default_GPU
@@ -204,6 +204,7 @@ Python 图形界面与功能扩展，修改日期：2026-09-06。
 应用设置
 
 为桌面 EXE 选择 Windows 自动、节能或高性能偏好，并保留其他图形参数。具体物理 GPU 由 Windows 和应用决定；配置后需要退出并重新启动目标程序。未知的 Windows 自定义 GPU 指定不会被误判为自动。
+在列表中选择路径后，可点击“清除所选路径”预览并删除整条图形设置，包括 Auto HDR 和窗口化优化；不删除应用文件。操作前备份、操作后读回验证，可在“备份与日志”恢复。
 
 配置方案
 

@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QComboBox, QFileDialog, QGridL
     QLabel, QLineEdit, QMessageBox, QPushButton, QTableWidget, QTableWidgetItem,
     QHeaderView, QVBoxLayout, QWidget)
 
-from app_preferences import PREFERENCES, app_plan, list_app_preferences, normalize_exe, preference_state
+from app_preferences import PREFERENCES, app_plan, clear_app_plan, list_app_preferences, normalize_exe, preference_state
 from gpu_core import PREF
 
 
@@ -63,17 +63,35 @@ class ApplicationPage(QWidget):
         self.table.setMinimumHeight(130)
         self.table.itemSelectionChanged.connect(self.select_row)
         box.addWidget(self.table, 1)
-        box.addWidget(text_label('仅更改 GPU 偏好，保留 Auto HDR、窗口化优化等其他参数。恢复自动会清除应用的 GPU 指定项。列表中的不存在路径仍可清除偏好；不会删除应用文件。'))
+        self.clear_button = QPushButton('清除所选路径…')
+        self.clear_button.setEnabled(False)
+        self.clear_button.setToolTip('预览并删除选中路径的整条图形设置记录，包括 GPU 偏好、Auto HDR 和窗口化优化；不会删除应用文件。')
+        self.clear_button.clicked.connect(self.clear_selected)
+        box.addWidget(self.clear_button)
+        self.path_edit.textEdited.connect(self.clear_selection)
+        box.addWidget(text_label('应用偏好和恢复自动保留 Auto HDR、窗口化优化等其他参数。“清除所选路径”会删除该路径的全部图形设置，清除后可从备份恢复；不会删除应用文件。'))
+
+    def selected_path(self):
+        rows = self.table.selectionModel().selectedRows()
+        if len(rows) == 1 and 0 <= rows[0].row() < len(self.entries):
+            return self.entries[rows[0].row()]['path']
+        return None
+
+    def clear_selection(self):
+        self.table.clearSelection()
+        self.clear_button.setEnabled(False)
 
     def browse(self):
         path, _ = QFileDialog.getOpenFileName(self, '选择应用实际运行的 EXE', '', 'Windows 程序 (*.exe)')
         if path:
+            self.clear_selection()
             self.path_edit.setText(normalize_exe(path))
             self.load_current(self.path_edit.text())
 
-    def load_current(self, path):
+    def load_current(self, path, exact_path=False):
         try:
-            path = normalize_exe(path)
+            if not exact_path:
+                path = normalize_exe(path)
             item = self.owner.db.read('HKCU', PREF, path, 64)
             mode, status = preference_state(*item) if item else preference_state(None)
             self.preference.setCurrentIndex(self.preference.findData(mode))
@@ -82,37 +100,44 @@ class ApplicationPage(QWidget):
             self.feedback.setText('读取失败：' + str(exc))
 
     def select_row(self):
-        row = self.table.currentRow()
-        if 0 <= row < len(self.entries):
-            self.path_edit.setText(self.entries[row]['path'])
-            self.load_current(self.entries[row]['path'])
+        path = self.selected_path()
+        self.clear_button.setEnabled(path is not None and self.apply_button.isEnabled())
+        if path is not None:
+            self.path_edit.setText(path)
+            self.load_current(path, exact_path=True)
 
     def refresh(self):
         try:
             entries = list_app_preferences(self.owner.db)
-            selected = self.path_edit.text().casefold()
+            selected = self.selected_path()
             scroll = self.table.verticalScrollBar().value()
             self.table.blockSignals(True)
             self.table.setRowCount(len(entries))
             self.entries = entries
+            selected_row = None
             for row, item in enumerate(entries):
                 status = item['status'] + ('' if item['exists'] else ' · 文件不存在')
                 for col, raw in enumerate((item['name'], status, item['path'])):
                     cell = QTableWidgetItem(raw)
                     cell.setToolTip(raw)
                     self.table.setItem(row, col, cell)
-                if item['path'].casefold() == selected:
-                    self.table.selectRow(row)
+                if selected is not None and item['path'].casefold() == selected.casefold():
+                    selected_row = row
+            self.table.clearSelection()
+            if selected_row is not None:
+                self.table.selectRow(selected_row)
             self.table.verticalScrollBar().setValue(scroll)
             self.apply_button.setEnabled(True)
             self.reset_button.setEnabled(True)
             self.verify_button.setEnabled(True)
+            self.clear_button.setEnabled(self.selected_path() is not None)
             return True
         except Exception as exc:
             self.feedback.setText('应用列表读取失败，停止操作：' + str(exc))
             self.apply_button.setEnabled(False)
             self.reset_button.setEnabled(False)
             self.verify_button.setEnabled(False)
+            self.clear_button.setEnabled(False)
             return False
         finally:
             self.table.blockSignals(False)
@@ -123,21 +148,40 @@ class ApplicationPage(QWidget):
     def reset(self):
         self.change(0)
 
-    def change(self, preference):
+    def clear_selected(self):
         try:
+            path = self.selected_path()
+            if path is None:
+                raise ValueError('请先在列表中选择要清除的路径。')
             if not self.owner.refresh():
                 raise ValueError('无法读取最新系统状态，已停止操作。')
-            plan = app_plan(self.owner.db, self.path_edit.text(), preference, require_exists=preference != 0)
+            plan = clear_app_plan(self.owner.db, path)
+            if self.owner.execute(plan, '清除应用路径及全部图形设置'):
+                if self.refresh():
+                    self.feedback.setText('已清除并读回验证：' + path + '。未删除应用文件；可从“备份与日志”恢复该路径的全部设置。')
+        except Exception as exc:
+            QMessageBox.critical(self, '路径清除未完成', str(exc))
+
+    def change(self, preference):
+        try:
+            path = self.path_edit.text()
+            exact_path = path == self.selected_path()
+            if not self.owner.refresh():
+                raise ValueError('无法读取最新系统状态，已停止操作。')
+            plan = app_plan(self.owner.db, path, preference, require_exists=preference != 0,
+                            exact_path=exact_path)
             if self.owner.execute(plan, '应用GPU偏好'):
                 self.refresh()
-                self.load_current(plan[0]['name'])
+                self.load_current(plan[0]['name'], exact_path=True)
                 self.feedback.setText('已应用并读回验证：' + PREFERENCES[preference] + '。请完整退出并重新启动目标程序。')
         except Exception as exc:
             QMessageBox.critical(self, '应用偏好未完成', str(exc))
 
     def verify(self):
         try:
-            path = normalize_exe(self.path_edit.text())
+            path = self.path_edit.text()
+            if path != self.selected_path():
+                path = normalize_exe(path)
             item = self.owner.db.read('HKCU', PREF, path, 64)
             mode, status = preference_state(*item) if item else preference_state(None)
             matches = mode is not None and mode == self.preference.currentData()

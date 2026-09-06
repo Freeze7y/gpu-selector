@@ -1,6 +1,6 @@
 # 第三方组件、许可证与对应源码
 
-适用版本：GPU Selector v2.0.1-beta，Windows x64 主程序与独立 x86 OpenGL 探针。
+适用版本：GPU Selector v2.0.2-beta，Windows x64 主程序与独立 x86 OpenGL 探针。
 
 本程序使用 **Qt / PySide6 / Shiboken 6.11.2**。相关库以动态库形式装入进程，
 本发行采用其 LGPLv3 开源许可选项；库中第三方代码按各自许可证提供。
@@ -79,7 +79,7 @@ bzip2 和 libffi 文字。它们不是完整的 Python 第三方组件清单，�
 
 **与二进制相同 Release 的 Assets 提供以下两个未经修改的官方源码压缩包：**
 
-[v2.0.1-beta 发布页与源码下载](https://github.com/Freeze7y/gpu-selector/releases/tag/v2.0.1-beta)
+[v2.0.2-beta 发布页与源码下载](https://github.com/Freeze7y/gpu-selector/releases/tag/v2.0.2-beta)
 
 | 文件 | SHA-256 |
 |---|---|

@@ -1,5 +1,5 @@
 {
-  "scope": "Public v2.0.1-beta binary dependency inventory; exact final EXE hash is provided in the release checksums. License data files excluded.",
+  "scope": "Public v2.0.2-beta binary dependency inventory; exact final EXE hash is provided in the release checksums. License data files excluded.",
   "qt_build": "Qt 6.11.2 (x86_64-little_endian-llp64 shared (dynamic) release build; by MSVC 2022)",
   "python_x64": "3.12.14",
   "python_x86": "3.13.15",

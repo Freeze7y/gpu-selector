@@ -59,12 +59,30 @@ def preference_string(current, preference):
     return ';'.join(fields) + ';' if fields else None
 
 
-def app_plan(db, path, preference, require_exists=False):
-    path = normalize_exe(path, require_exists)
+def app_plan(db, path, preference, require_exists=False, exact_path=False):
+    if exact_path:
+        if not valid_exe_path(path):
+            raise ValueError('请选择完整路径的 .exe 文件。')
+        if require_exists and not Path(path).is_file():
+            raise ValueError('应用文件不存在；请重新选择实际的 .exe 文件。')
+    else:
+        path = normalize_exe(path, require_exists)
     old = db.read('HKCU', PREF, path, 64)
     if old is not None and (old[1] != reg.REG_SZ or not isinstance(old[0], str)):
         raise ValueError('应用设置不是字符串，停止修改。')
     return [operation('HKCU', PREF, path, preference_string(old[0] if old else None, preference))]
+
+
+def clear_app_plan(db, path):
+    # Registry value names are exact paths; normalizing could target another entry.
+    if not valid_exe_path(path):
+        raise ValueError('请在列表中选择要清除的应用路径。')
+    old = db.read('HKCU', PREF, path, 64)
+    if old is None:
+        raise ValueError('该路径的设置记录已不存在，请刷新列表。')
+    if old[1] != reg.REG_SZ or not isinstance(old[0], str):
+        raise ValueError('应用设置不是字符串，停止清除。')
+    return [operation('HKCU', PREF, path, None)]
 
 
 def list_app_preferences(db):
